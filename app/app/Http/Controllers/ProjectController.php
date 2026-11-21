@@ -51,7 +51,10 @@ class ProjectController extends Controller
     {
         $project->load('client', 'bids.developer');
 
-        return view('projects.show', compact('project'));
+        return view('projects.show', [
+            'project'    => $project,
+            'developers' => User::where('role', 'developer')->get(),
+        ]);
     }
 
     // Form edit
