@@ -1,3 +1,47 @@
+# Garuda-Hub (Refactor Laravel MVC)
+
+Refactor dari prototipe PHP native (`legacy/`) ke **Laravel** dengan arsitektur **MVC** dan **Eloquent ORM**.
+
+## Skema Database (ERD)
+
+```
+users (id, name, email*, password, role)
+   │ 1
+   ├──────< projects (id, client_id→users, title, description, category, budget, bid_deadline, status)
+   │                    │ 1
+   │                    └──────< bids (id, project_id→projects, developer_id→users,
+   │ 1                                 price, duration_days, proposal, status)
+   └──────────────────────────────────^
+```
+
+- Satu **user (klien)** punya banyak **project**.
+- Satu **project** punya banyak **bid**.
+- Satu **user (developer)** punya banyak **bid**.
+- `unique(project_id, developer_id)`: satu developer hanya boleh menawar sekali per proyek.
+- Semua relasi memakai **foreign key**.
+
+## Cara menjalankan
+
+```bash
+cd app
+composer install
+cp .env.example .env
+php artisan key:generate
+# atur DB_* di .env (MySQL), buat database garuda_hub
+php artisan migrate:fresh --seed
+php artisan serve
+```
+
+Buka http://127.0.0.1:8000
+
+## Struktur MVC
+
+- **Model:** `app/Models` (User, Project, Bid)
+- **View:** `app/resources/views` (Blade)
+- **Controller:** `app/app/Http/Controllers` (ProjectController, BidController)
+
+---
+
 # Garuda-Hub
 
 Website lelang proyek IT: klien memasang proyek, developer menawar, klien memilih pemenang. Dibuat untuk **studi kasus pembelajaran keamanan** mahasiswa dengan praktik PHP standar. Semua data adalah data dummy.
