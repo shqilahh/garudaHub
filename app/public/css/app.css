@@ -1,0 +1,7 @@
+body{font-family:sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem}
+nav{margin-bottom:1rem}
+.card{border:1px solid #ccc;padding:1rem;margin:.5rem 0;border-radius:6px}
+input,select,textarea{display:block;width:100%;margin:.3rem 0 .8rem;padding:.4rem;box-sizing:border-box}
+.err{color:#b00}
+.ok{color:#080}
+button{padding:.4rem .8rem}
