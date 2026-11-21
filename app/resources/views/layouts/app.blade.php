@@ -10,6 +10,17 @@
 <nav>
     <a href="{{ route('projects.index') }}">Garuda-Hub</a> |
     <a href="{{ route('projects.create') }}">+ Proyek Baru</a>
+
+    @auth
+        | Halo, {{ auth()->user()->name }} ({{ auth()->user()->role }})
+        <form method="POST" action="{{ route('logout') }}" style="display:inline">
+            @csrf
+            <button>Logout</button>
+        </form>
+    @else
+        | <a href="{{ route('login') }}">Login</a>
+        | <a href="{{ route('register') }}">Daftar</a>
+    @endauth
 </nav>
 
 @if(session('ok'))
