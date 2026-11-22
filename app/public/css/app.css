@@ -5,3 +5,4 @@ input,select,textarea{display:block;width:100%;margin:.3rem 0 .8rem;padding:.4re
 .err{color:#b00}
 .ok{color:#080}
 button{padding:.4rem .8rem}
+form.inline{display:inline}

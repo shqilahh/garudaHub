@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{{-- NIM: 252410102022 --}}
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -15,7 +16,7 @@
             | <a href="{{ route('projects.create') }}">+ Proyek Baru</a>
         @endif
         | Halo, {{ auth()->user()->name }} ({{ auth()->user()->role }})
-        <form method="POST" action="{{ route('logout') }}" style="display:inline">
+        <form method="POST" action="{{ route('logout') }}" class="inline">
             @csrf
             <button>Logout</button>
         </form>

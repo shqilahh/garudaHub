@@ -12,7 +12,7 @@
 {{-- Edit/Hapus hanya tampil untuk pemilik proyek --}}
 @if(auth()->id() === $project->client_id)
     <a href="{{ route('projects.edit', $project) }}">Edit</a>
-    <form method="POST" action="{{ route('projects.destroy', $project) }}" style="display:inline">
+    <form method="POST" action="{{ route('projects.destroy', $project) }}" class="inline">
         @csrf
         @method('DELETE')
         <button>Hapus</button>
@@ -27,7 +27,7 @@
         <p>{{ $b->proposal }}</p>
 
         @if(auth()->id() === $project->client_id && $project->status === 'open')
-            <form method="POST" action="{{ route('bids.accept', $b) }}" style="display:inline">
+            <form method="POST" action="{{ route('bids.accept', $b) }}" class="inline">
                 @csrf
                 @method('PATCH')
                 <button>Pilih pemenang</button>
@@ -35,7 +35,7 @@
         @endif
 
         @if(auth()->id() === $b->developer_id)
-            <form method="POST" action="{{ route('bids.destroy', $b) }}" style="display:inline">
+            <form method="POST" action="{{ route('bids.destroy', $b) }}" class="inline">
                 @csrf
                 @method('DELETE')
                 <button>Hapus penawaran</button>
