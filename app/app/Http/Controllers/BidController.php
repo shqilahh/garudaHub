@@ -6,34 +6,36 @@ use App\Models\Bid;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class BidController extends Controller
 {
-    // Kirim penawaran baru ke sebuah proyek
     public function store(Request $request, Project $project)
     {
+        abort_unless($project->status === 'open', 403);
+
         $data = $request->validate([
-            'developer_id'  => [
-                'required',
-                'exists:users,id',
-                // satu developer hanya boleh satu penawaran per proyek
-                Rule::unique('bids')->where('project_id', $project->id),
-            ],
             'price'         => 'required|integer|min:1',
             'duration_days' => 'required|integer|min:1',
             'proposal'      => 'required',
         ]);
 
-        $project->bids()->create($data);
+        // Satu developer hanya boleh satu penawaran per proyek
+        if ($project->bids()->where('developer_id', auth()->id())->exists()) {
+            return back()->withErrors(['price' => 'Kamu sudah mengajukan penawaran di proyek ini.']);
+        }
+
+        // Developer diambil dari user yang login, BUKAN dari input form
+        $project->bids()->create($data + ['developer_id' => auth()->id()]);
 
         return back()->with('ok', 'Penawaran dikirim.');
     }
 
-    // Klien memilih pemenang
     public function accept(Bid $bid)
     {
-        // Transaction: semua perubahan berhasil bersama, atau batal semua
+        // Hanya pemilik proyek yang boleh memilih pemenang
+        abort_unless($bid->project->client_id === auth()->id(), 403);
+        abort_unless($bid->project->status === 'open', 403);
+
         DB::transaction(function () use ($bid) {
             $bid->project->bids()->update(['status' => 'rejected']);
             $bid->update(['status' => 'accepted']);
@@ -43,9 +45,11 @@ class BidController extends Controller
         return back()->with('ok', 'Pemenang dipilih.');
     }
 
-    // Hapus penawaran
     public function destroy(Bid $bid)
     {
+        // Hanya pembuat penawaran yang boleh menghapusnya
+        abort_unless($bid->developer_id === auth()->id(), 403);
+
         $bid->delete();
 
         return back()->with('ok', 'Penawaran dihapus.');

@@ -8,10 +8,12 @@
 </head>
 <body>
 <nav>
-    <a href="{{ route('projects.index') }}">Garuda-Hub</a> |
-    <a href="{{ route('projects.create') }}">+ Proyek Baru</a>
+    <a href="{{ route('projects.index') }}">Garuda-Hub</a>
 
     @auth
+        @if(auth()->user()->role === 'client')
+            | <a href="{{ route('projects.create') }}">+ Proyek Baru</a>
+        @endif
         | Halo, {{ auth()->user()->name }} ({{ auth()->user()->role }})
         <form method="POST" action="{{ route('logout') }}" style="display:inline">
             @csrf

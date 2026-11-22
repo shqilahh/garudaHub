@@ -9,12 +9,15 @@
     Status: {{ $project->status }}
 </p>
 
-<a href="{{ route('projects.edit', $project) }}">Edit</a>
-<form method="POST" action="{{ route('projects.destroy', $project) }}" style="display:inline">
-    @csrf
-    @method('DELETE')
-    <button>Hapus</button>
-</form>
+{{-- Edit/Hapus hanya tampil untuk pemilik proyek --}}
+@if(auth()->id() === $project->client_id)
+    <a href="{{ route('projects.edit', $project) }}">Edit</a>
+    <form method="POST" action="{{ route('projects.destroy', $project) }}" style="display:inline">
+        @csrf
+        @method('DELETE')
+        <button>Hapus</button>
+    </form>
+@endif
 
 <h3>Penawaran</h3>
 @forelse($project->bids as $b)
@@ -23,7 +26,7 @@
         {{ $b->duration_days }} hari [{{ $b->status }}]
         <p>{{ $b->proposal }}</p>
 
-        @if($project->status === 'open')
+        @if(auth()->id() === $project->client_id && $project->status === 'open')
             <form method="POST" action="{{ route('bids.accept', $b) }}" style="display:inline">
                 @csrf
                 @method('PATCH')
@@ -31,37 +34,38 @@
             </form>
         @endif
 
-        <form method="POST" action="{{ route('bids.destroy', $b) }}" style="display:inline">
-            @csrf
-            @method('DELETE')
-            <button>Hapus</button>
-        </form>
+        @if(auth()->id() === $b->developer_id)
+            <form method="POST" action="{{ route('bids.destroy', $b) }}" style="display:inline">
+                @csrf
+                @method('DELETE')
+                <button>Hapus penawaran</button>
+            </form>
+        @endif
     </div>
 @empty
     <p>Belum ada penawaran.</p>
 @endforelse
 
 @if($project->status === 'open')
-    <h3>Ajukan penawaran</h3>
-    <form method="POST" action="{{ route('bids.store', $project) }}">
-        @csrf
-        <label>Developer</label>
-        <select name="developer_id">
-            @foreach($developers as $d)
-                <option value="{{ $d->id }}">{{ $d->name }}</option>
-            @endforeach
-        </select>
+    @auth
+        @if(auth()->user()->role === 'developer')
+            <h3>Ajukan penawaran</h3>
+            <form method="POST" action="{{ route('bids.store', $project) }}">
+                @csrf
+                <label>Harga (Rp)</label>
+                <input type="number" name="price">
 
-        <label>Harga (Rp)</label>
-        <input type="number" name="price">
+                <label>Durasi (hari)</label>
+                <input type="number" name="duration_days">
 
-        <label>Durasi (hari)</label>
-        <input type="number" name="duration_days">
+                <label>Proposal</label>
+                <textarea name="proposal"></textarea>
 
-        <label>Proposal</label>
-        <textarea name="proposal"></textarea>
-
-        <button>Kirim</button>
-    </form>
+                <button>Kirim</button>
+            </form>
+        @endif
+    @else
+        <p><a href="{{ route('login') }}">Login</a> sebagai developer untuk mengajukan penawaran.</p>
+    @endauth
 @endif
 @endsection

@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-    // Daftar proyek + pencarian
     public function index(Request $request)
     {
         $projects = Project::with('client')
@@ -20,20 +18,14 @@ class ProjectController extends Controller
         return view('projects.index', compact('projects'));
     }
 
-    // Form buat proyek baru
     public function create()
     {
-        return view('projects.form', [
-            'project' => new Project,
-            'clients' => User::where('role', 'client')->get(),
-        ]);
+        return view('projects.form', ['project' => new Project]);
     }
 
-    // Simpan proyek baru
     public function store(Request $request)
     {
         $data = $request->validate([
-            'client_id'    => 'required|exists:users,id',
             'title'        => 'required|max:150',
             'description'  => 'required',
             'category'     => 'required|max:50',
@@ -41,34 +33,30 @@ class ProjectController extends Controller
             'bid_deadline' => 'required|date|after:now',
         ]);
 
-        $project = Project::create($data);
+        // Pemilik diambil dari user yang login, BUKAN dari input form
+        $project = Project::create($data + ['client_id' => auth()->id()]);
 
         return redirect()->route('projects.show', $project)->with('ok', 'Proyek dibuat.');
     }
 
-    // Detail proyek
     public function show(Project $project)
     {
         $project->load('client', 'bids.developer');
 
-        return view('projects.show', [
-            'project'    => $project,
-            'developers' => User::where('role', 'developer')->get(),
-        ]);
+        return view('projects.show', compact('project'));
     }
 
-    // Form edit
     public function edit(Project $project)
     {
-        return view('projects.form', [
-            'project' => $project,
-            'clients' => User::where('role', 'client')->get(),
-        ]);
+        $this->ensureOwner($project);
+
+        return view('projects.form', compact('project'));
     }
 
-    // Simpan perubahan
     public function update(Request $request, Project $project)
     {
+        $this->ensureOwner($project);
+
         $data = $request->validate([
             'title'        => 'required|max:150',
             'description'  => 'required',
@@ -82,11 +70,18 @@ class ProjectController extends Controller
         return redirect()->route('projects.show', $project)->with('ok', 'Proyek diperbarui.');
     }
 
-    // Hapus
     public function destroy(Project $project)
     {
+        $this->ensureOwner($project);
+
         $project->delete();
 
         return redirect()->route('projects.index')->with('ok', 'Proyek dihapus.');
+    }
+
+    // Hanya pemilik proyek yang boleh mengubah/menghapus
+    private function ensureOwner(Project $project): void
+    {
+        abort_unless($project->client_id === auth()->id(), 403);
     }
 }

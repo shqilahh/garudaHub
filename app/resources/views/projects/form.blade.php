@@ -9,15 +9,6 @@
         @method('PUT')
     @endif
 
-    @unless($project->exists)
-        <label>Klien</label>
-        <select name="client_id">
-            @foreach($clients as $c)
-                <option value="{{ $c->id }}">{{ $c->name }}</option>
-            @endforeach
-        </select>
-    @endunless
-
     <label>Judul</label>
     <input name="title" value="{{ old('title', $project->title) }}">
 
