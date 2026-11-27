@@ -41,7 +41,7 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        $project->load('client', 'bids.developer');
+        $project->load('client', 'bids.developer', 'bids.rating');
 
         return view('projects.show', compact('project'));
     }

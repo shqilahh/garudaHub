@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RatingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BidController;
 use App\Http\Controllers\ProjectController;
@@ -25,6 +26,7 @@ Route::middleware(['auth', 'role:client'])->group(function () {
     Route::put('projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
     Route::patch('bids/{bid}/accept', [BidController::class, 'accept'])->name('bids.accept');
+    Route::post('bids/{bid}/rating', [RatingController::class, 'store'])->name('ratings.store');
 });
 
 // Publik: detail proyek (harus setelah projects/create)

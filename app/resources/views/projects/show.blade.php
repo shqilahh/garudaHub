@@ -9,7 +9,6 @@
     Status: {{ $project->status }}
 </p>
 
-{{-- Edit/Hapus hanya tampil untuk pemilik proyek --}}
 @if(auth()->id() === $project->client_id)
     <a href="{{ route('projects.edit', $project) }}">Edit</a>
     <form method="POST" action="{{ route('projects.destroy', $project) }}" class="inline">
@@ -21,9 +20,15 @@
 
 <h3>Penawaran</h3>
 @forelse($project->bids as $b)
+    @php
+        $total = $b->developer->ratingsReceived()->count();
+        $avg   = $b->developer->ratingsReceived()->avg('score');
+    @endphp
     <div class="card">
         {{ $b->developer->name }}: Rp{{ number_format($b->price) }},
         {{ $b->duration_days }} hari [{{ $b->status }}]
+        <br>
+        <small>Reputasi developer: {{ $total ? number_format($avg, 1).' / 5 ('.$total.' rating)' : 'belum ada rating' }}</small>
         <p>{{ $b->proposal }}</p>
 
         @if(auth()->id() === $project->client_id && $project->status === 'open')
@@ -40,6 +45,25 @@
                 @method('DELETE')
                 <button>Hapus penawaran</button>
             </form>
+        @endif
+
+        {{-- Rating hanya untuk penawaran pemenang --}}
+        @if($b->status === 'accepted')
+            @if($b->rating)
+                <p><b>Rating: {{ $b->rating->score }}/5</b> {{ $b->rating->comment }}</p>
+            @elseif(auth()->id() === $project->client_id)
+                <form method="POST" action="{{ route('ratings.store', $b) }}">
+                    @csrf
+                    <label>Beri rating developer</label>
+                    <select name="score">
+                        @for($i = 5; $i >= 1; $i--)
+                            <option value="{{ $i }}">{{ $i }}</option>
+                        @endfor
+                    </select>
+                    <textarea name="comment" placeholder="Komentar (opsional)"></textarea>
+                    <button>Kirim rating</button>
+                </form>
+            @endif
         @endif
     </div>
 @empty
