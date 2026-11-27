@@ -40,4 +40,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Bid::class, 'developer_id');
     }
+
+    // Rating yang diterima user ini sebagai developer
+    public function ratingsReceived()
+    {
+        return $this->hasMany(Rating::class, 'developer_id');
+    }
 }
